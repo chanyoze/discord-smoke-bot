@@ -62,8 +62,10 @@ function sessionTotal(sessionId) {
   return getSession(sessionId).reduce((s, r) => s + r.count, 0);
 }
 
-// 채팅 트리거 패턴: "담배 피실/푸실/펴실/필 분" (띄어쓰기 유무 무관)
-const TRIGGER = /담배\s*(피실|푸실|펴실|필)\s*분/;
+// 채팅 트리거 패턴 (띄어쓰기 유무 무관)
+//  - "담배 피실/푸실/펴실/필 분"
+//  - "한 대 푸자/피자/펴자"
+const TRIGGER = /담배\s*(피실|푸실|펴실|필)\s*분|한\s*대\s*(푸|피|펴)자/;
 
 // 세션 카드 생성 후 3분 뒤 자동 마감 예약
 function scheduleAutoClose(message) {
