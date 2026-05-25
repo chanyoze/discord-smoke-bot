@@ -21,3 +21,10 @@ export function kstWeekStart(ts = Date.now()) {
   const dayStartKst = Math.floor(kst / DAY) * DAY;
   return dayStartKst - sinceMonday * DAY - KST;
 }
+
+// KST 기준 "이번 달 1일 00:00"의 UTC 밀리초
+export function kstMonthStart(ts = Date.now()) {
+  const d = new Date(ts + KST); // UTC 필드에 KST 값이 담긴 시각
+  const monthStartAsUtc = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  return monthStartAsUtc - KST;
+}

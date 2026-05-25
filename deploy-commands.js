@@ -9,6 +9,12 @@ const commands = [
   new SlashCommandBuilder().setName('오늘').setDescription('오늘 담배 순위를 봅니다'),
   new SlashCommandBuilder().setName('이번주').setDescription('이번 주 담배 순위를 봅니다'),
   new SlashCommandBuilder().setName('순위').setDescription('전체 누적 담배 순위를 봅니다'),
+  new SlashCommandBuilder()
+    .setName('내기록')
+    .setDescription('내 담배 기록을 봅니다 (대상 지정 시 그 사람 기록)')
+    .addUserOption((o) =>
+      o.setName('대상').setDescription('다른 사람 기록 보기 (선택)').setRequired(false)
+    ),
 ].map((c) => c.toJSON());
 
 const { DISCORD_TOKEN, CLIENT_ID, GUILD_ID } = process.env;

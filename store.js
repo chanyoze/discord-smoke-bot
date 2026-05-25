@@ -14,11 +14,14 @@ mkdirSync(DATA_DIR, { recursive: true });
 const FILE = join(DATA_DIR, 'data.json');
 
 function load() {
-  if (!existsSync(FILE)) return { records: [] };
+  if (!existsSync(FILE)) return { records: [], meta: {} };
   try {
-    return JSON.parse(readFileSync(FILE, 'utf8'));
+    const data = JSON.parse(readFileSync(FILE, 'utf8'));
+    data.records ??= [];
+    data.meta ??= {};
+    return data;
   } catch {
-    return { records: [] };
+    return { records: [], meta: {} };
   }
 }
 
@@ -76,4 +79,41 @@ export function ranking(guildId, from = 0) {
     map.set(r.userId, cur);
   }
   return [...map.values()].sort((a, b) => b.total - a.total);
+}
+
+// 특정 유저의 from(UTC ms) 이후 누적 개비 수
+export function userTotal(guildId, userId, from = 0) {
+  const { records } = load();
+  let total = 0;
+  for (const r of records) {
+    if (r.guildId !== guildId || r.userId !== userId) continue;
+    if (r.createdAt < from) continue;
+    total += r.count;
+  }
+  return total;
+}
+
+// ── 무흡연 알림용 메타 ──────────────────────────────
+// 흡연이 일어날 때마다 호출: 마지막 흡연 시각/채널 기록 + 알림 플래그 리셋
+export function touchSmoke(guildId, channelId) {
+  const data = load();
+  data.meta[guildId] = {
+    lastSmokeAt: Date.now(),
+    lastChannelId: channelId,
+    alerted: false,
+  };
+  save(data);
+}
+
+export function getMeta() {
+  return load().meta;
+}
+
+// 무흡연 알림을 이미 보냈다고 표시(중복 알림 방지)
+export function markAlerted(guildId) {
+  const data = load();
+  if (data.meta[guildId]) {
+    data.meta[guildId].alerted = true;
+    save(data);
+  }
 }
