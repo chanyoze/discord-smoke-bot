@@ -92,8 +92,9 @@ async function sendSession(channel) {
 async function maybeComment(channel, before, after) {
   if (!crossedThreshold(before, after)) return;
   const c = pickComment(after);
+  const prefix = c.emoji ? `${c.emoji} ` : ''; // 켈시는 이모지 없음
   try {
-    await channel.send(`${c.emoji} **${c.who}**: ${c.line}`);
+    await channel.send(`${prefix}**${c.who}**: ${c.line}`);
   } catch {
     // 전송 실패는 무시
   }
