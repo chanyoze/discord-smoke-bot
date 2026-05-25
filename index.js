@@ -28,6 +28,7 @@ import {
 } from './ui.js';
 import { kstDayStart, kstWeekStart, kstMonthStart } from './time.js';
 import { crossedThreshold, pickComment } from './comments.js';
+import { log } from './logger.js';
 
 const AUTO_CLOSE_MS = 3 * 60 * 1000; // 세션 자동 마감: 3분
 const ALERT_HOURS = Number(process.env.NO_SMOKE_ALERT_HOURS || 3); // 무흡연 알림 기준 시간
@@ -42,9 +43,15 @@ const client = new Client({
 });
 
 client.once(Events.ClientReady, (c) => {
-  console.log(`✅ 로그인 완료: ${c.user.tag}`);
+  log.info(`✅ 로그인 완료: ${c.user.tag}`);
   setInterval(checkNoSmoke, CHECK_INTERVAL_MS); // 무흡연 알림 주기 체크 시작
 });
+
+// ── 전역 에러 로깅 ────────────────────────────────────
+client.on(Events.Error, (e) => log.error('Discord client 오류', e));
+client.on(Events.Warn, (m) => log.warn('Discord 경고', m));
+process.on('unhandledRejection', (e) => log.error('처리되지 않은 Promise 거부', e));
+process.on('uncaughtException', (e) => log.error('잡히지 않은 예외', e));
 
 // 표시명 얻기(서버 별명 우선)
 function nameOf(interaction) {
@@ -257,7 +264,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
   } catch (err) {
-    console.error('상호작용 처리 오류:', err);
+    log.error('상호작용 처리 오류', err);
   }
 });
 
